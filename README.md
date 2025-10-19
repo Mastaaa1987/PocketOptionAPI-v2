@@ -35,22 +35,47 @@ pip install git+https://github.com/Mastaaa1987/PocketOptionAPI-v2.git
 
 ```python
 from pocketoptionapi.stable_api import PocketOption
-import pocketoptionapi.global_value as global_value
+import time
 
 # Session configuration
 ssid = """42["auth",{"session":"asdasdasddsad","isDemo":1,"uid":12345465,"platform":2}]"""
 demo = True  # True for demo account, False for real account
 
+symbol = "CADCHF_otc"
+period = 30
+
 # Initialize API
 api = PocketOption(ssid, demo)
 
 # Connect
-connect = api.connect()
-print(connect)
+api.connect()
+
+time.sleep(3)
 
 # Check balance
 saldo = api.get_balance()
-print(f"💰 Saldo: ${saldo:.2f}")
+
+print(saldo)
+
+time.sleep(1)
+
+pairs = api.get_pairs()
+
+#print(pairs)
+for pair in pairs:
+    print(pair, pairs[pair])
+
+time.sleep(1)
+
+result = api.get_symbol(symbol, period)
+
+print(result) # True or False
+
+time.sleep(1)
+
+df = api.get_dataframe(symbol, period)
+
+print(df)
 
 
 ```
