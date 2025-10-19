@@ -40,7 +40,7 @@ class PocketOption:
 
     def get_server_timestamp(self):
         return self.api.time_sync.server_timestamp
-        
+
     def Stop(self):
         sys.exit()
 
@@ -65,7 +65,7 @@ class PocketOption:
 
     def start_async(self):
         asyncio.run(self.api.connect())
-        
+
     def disconnect(self):
         try:
             if global_value.websocket_is_connected:
@@ -106,7 +106,23 @@ class PocketOption:
             global_value.logger("Error connecting: %s" % str(e), "ERROR")
             return False
         return True
-    
+
+    def get_pairs(self):
+        try:
+            data = json.loads(self.api.GetPayoutData())
+            dat = {}
+            for pair in data:
+                if len(pair) == 19:
+                    if pair[14] == True:
+                        p = {}
+                        p['id'] = pair[0]
+                        p['payout'] = pair[5]
+                        p['type'] = pair[3]
+                        dat[pair[1]] = p
+            return dat
+        except:
+            return None
+
     def GetPayout(self, pair):
         try:
             data = self.api.GetPayoutData()
@@ -134,11 +150,11 @@ class PocketOption:
             return global_value.balance
         else:
             return None
-            
+
     @staticmethod
     def check_open():
         return global_value.order_open
-        
+
     @staticmethod
     def check_order_closed(ido):
         while ido not in global_value.order_closed:
@@ -150,7 +166,7 @@ class PocketOption:
                global_value.logger("Closed Order %s" % str(pack[1]), "DEBUG")
 
         return pack[0]
-    
+
     def buy(self, amount, active, action, expirations):
         self.api.buy_multi_option = {}
         self.api.buy_successful = None
@@ -364,7 +380,7 @@ class PocketOption:
 
             all_candles = []
 
-            # time_red = int(datetime.now().timestamp())
+            time_red = int(datetime.now().timestamp())
             while True:
                 try:
                     self.api.history_data = None
@@ -377,15 +393,19 @@ class PocketOption:
                             break
 
                     if self.api.history_data is not None:
-                        global_value.set_csv(active, self.api.history_data)
+                        all_candles.extend(self.api.history_data)
                         if end_time is None:
                             break
-                        _ = int(self.api.history_data[len(self.api.history_data)-1]["time"]) - int(self.api.history_data[0]["time"])
-                        time_red = time_red - _
-                        if time_red < end_time:
-                            break
+                        else:
+                            self.api.history_data = sorted(self.api.history_data, key=lambda x: x["time"])
+                            _ = int(self.api.history_data[len(self.api.history_data)-1]["time"]) - int(self.api.history_data[0]["time"])
+                            time_red = time_red - _
+                            if time_red < end_time:
+                                break
                 except Exception as e:
                     global_value.logger(str(e), "ERROR")
+            all_candles = sorted(all_candles, key=lambda x: x["time"])
+            global_value.set_cache(global_value.pairs[active]["id"], all_candles)
             return True
 
             if len(his['candles']) > 0:
@@ -466,7 +486,7 @@ class PocketOption:
                             if x == count_request:
                                 break
                             else:
-                                #self.api.history_data = sorted(self.api.history_data, key=lambda x: x["time"])
+                                self.api.history_data = sorted(self.api.history_data, key=lambda x: x["time"])
                                 _ = int(self.api.history_data[len(self.api.history_data)-1]["time"]) - int(self.api.history_data[0]["time"])
                                 time_red = time_red - _
 
@@ -496,5 +516,5 @@ class PocketOption:
             return True
 
         except:
-            global_value.logger("except get_candles", "DEBUG")
+            global_value.logger("except get_candles", "INFO")
             return False
