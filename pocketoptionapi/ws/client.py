@@ -170,7 +170,7 @@ class WebsocketClient(object):
 
             elif "requestId" in message and message["requestId"] == 'buy':
                 global_value.order_data = message
-                #global_value.open_orders.insert(0, message)
+                global_value.open_orders.insert(0, message)
 
             elif self.updateClosedDeals and isinstance(message, list):
                 global_value.closed_deals = message
@@ -178,7 +178,7 @@ class WebsocketClient(object):
 
             elif self.successcloseOrder and isinstance(message, dict):
                 self.api.order_async = message
-                #global_value.closed_orders.insert(0, message)
+                global_value.closed_orders.insert(0, message)
                 self.successcloseOrder = False
 
             elif self.loadHistoryPeriod and isinstance(message, dict):
@@ -189,11 +189,10 @@ class WebsocketClient(object):
                 self.updateStream = False
                 if len(message[0]) == 3:
                     self.api.time_sync.server_timestamp = message[0][1]
-                    h = {'time': message[0][1], 'price': message[0][2]}
                     if message[0][0] in global_value.pairs:
                         if 'history' in global_value.pairs[message[0][0]]:
+                            h = {'time': message[0][1], 'price': message[0][2]}
                             global_value.pairs[message[0][0]]['history'].append(h)
-                    global_value.set_csv(message[0][0], [h])
 
             elif self.updateHistoryNew and isinstance(message, dict):
                 self.updateHistoryNew = False
@@ -234,10 +233,10 @@ class WebsocketClient(object):
             elif message[0] == "successcloseOrder":
                 self.successcloseOrder = True
 
-            elif message[0] == "loadHistoryPeriodFast":
+            elif message[0] == "loadHistoryPeriod":
                 self.loadHistoryPeriod = True
 
-            elif message[0] == "loadHistoryPeriod":
+            elif message[0] == "loadHistoryPeriodFast":
                 self.loadHistoryPeriod = True
 
             elif message[0] == "updateStream":

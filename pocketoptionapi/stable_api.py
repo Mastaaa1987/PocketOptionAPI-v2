@@ -259,6 +259,94 @@ class PocketOption:
         diff = (diferencas[1:] == period).all()
         return data_df, diff
 
+    def get_symbol(self, active, period):
+        return self.get_candles(active, period)
+
+    def wait(self, sleep=True, period=60):
+        dt = int(datetime.now().timestamp()) - int(datetime.now().second)
+        if period == 60:
+            dt += 60
+        elif period == 30:
+            if datetime.now().second < 30: dt += 30
+            else: dt += 60
+            if not sleep: dt -= 30
+        elif period == 15:
+            if datetime.now().second >= 45: dt += 60
+            elif datetime.now().second >= 30: dt += 45
+            elif datetime.now().second >= 15: dt += 30
+            else: dt += 15
+            if not sleep: dt -= 15
+        elif period == 10:
+            if datetime.now().second >= 50: dt += 60
+            elif datetime.now().second >= 40: dt += 50
+            elif datetime.now().second >= 30: dt += 40
+            elif datetime.now().second >= 20: dt += 30
+            elif datetime.now().second >= 10: dt += 20
+            else: dt += 10
+            if not sleep: dt -= 10
+        elif period == 5:
+            if datetime.now().second >= 55: dt += 60
+            elif datetime.now().second >= 50: dt += 55
+            elif datetime.now().second >= 45: dt += 50
+            elif datetime.now().second >= 40: dt += 45
+            elif datetime.now().second >= 35: dt += 40
+            elif datetime.now().second >= 30: dt += 35
+            elif datetime.now().second >= 25: dt += 30
+            elif datetime.now().second >= 20: dt += 25
+            elif datetime.now().second >= 15: dt += 20
+            elif datetime.now().second >= 10: dt += 15
+            elif datetime.now().second >= 5: dt += 10
+            else: dt += 5
+            if not sleep: dt -= 5
+        elif period == 120:
+            dt = int(datetime(int(datetime.now().year), int(datetime.now().month), int(datetime.now().day), int(datetime.now().hour), int(math.floor(int(datetime.now().minute) / 2) * 2), 0).timestamp())
+            dt += 120
+        elif period == 180:
+            dt = int(datetime(int(datetime.now().year), int(datetime.now().month), int(datetime.now().day), int(datetime.now().hour), int(math.floor(int(datetime.now().minute) / 3) * 3), 0).timestamp())
+            dt += 180
+        elif period == 300:
+            dt = int(datetime(int(datetime.now().year), int(datetime.now().month), int(datetime.now().day), int(datetime.now().hour), int(math.floor(int(datetime.now().minute) / 5) * 5), 0).timestamp())
+            dt += 300
+        elif period == 600:
+            dt = int(datetime(int(datetime.now().year), int(datetime.now().month), int(datetime.now().day), int(datetime.now().hour), int(math.floor(int(datetime.now().minute) / 10) * 10), 0).timestamp())
+            dt += 600
+
+        return dt
+
+    def get_dataframe(self, active, period):
+        if active in global_value.pairs:
+            if 'dataframe' in global_value.pairs[active]:
+                df0 = global_value.pairs[active]['dataframe']
+            else:
+                df0 = None
+            if 'history' in global_value.pairs[active]:
+                history = []
+                history.extend(global_value.pairs[active]['history'])
+                df1 = pd.DataFrame(history).reset_index(drop=True)
+                df1 = df1.sort_values(by='time').reset_index(drop=True)
+                df1['time'] = pd.to_datetime(df1['time'], unit='s')
+                df1.set_index('time', inplace=True)
+                # df1.index = df1.index.floor('1s')
+
+                df = df1['price'].resample(f'{period}s').ohlc()
+                df.reset_index(inplace=True)
+                df = df.loc[df['time'] < datetime.fromtimestamp(self.wait(False, period))]
+
+                if df0 is not None:
+                    ts = datetime.timestamp(df.loc[0]['time'])
+                    for x in range(0, len(df0)):
+                        ts2 = datetime.timestamp(df0.loc[x]['time'])
+                        if ts2 < ts:
+                            df = df._append(df0.loc[x], ignore_index = True)
+                        else:
+                            break
+                    df = df.sort_values(by='time').reset_index(drop=True)
+                    df.set_index('time', inplace=True)
+                    df.reset_index(inplace=True)
+
+                return df
+        return None
+
     def change_symbol(self, active, period):
         return self.api.change_symbol(active, period)
 
@@ -309,6 +397,8 @@ class PocketOption:
                 h = {'time': hist[0], 'price': hist[1]}
                 c1.append(h)
             c1 = sorted(c1, key=lambda x: x["time"])
+            if not active in global_value.pairs:
+                global_value.pairs[active] = {}
             if active in global_value.pairs:
                 global_value.pairs[active]['history'] = c1
                 if len(c0) > 0:
@@ -392,6 +482,8 @@ class PocketOption:
                 h = {'time': hist[0], 'price': hist[1]}
                 c1.append(h)
             c1 = sorted(c1, key=lambda x: x["time"])
+            if not active in global_value.pairs:
+                global_value.pairs[active] = {}
             if active in global_value.pairs:
                 global_value.pairs[active]['history'] = c1
                 if len(c0) > 0:
