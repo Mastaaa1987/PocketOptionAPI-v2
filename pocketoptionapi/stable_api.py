@@ -360,7 +360,6 @@ class PocketOption:
                     df = df.sort_values(by='time').reset_index(drop=True)
                     df.set_index('time', inplace=True)
                     df.reset_index(inplace=True)
-                #df.dropna(inplace=True)
 
                 return df
         return None
@@ -504,8 +503,6 @@ class PocketOption:
                 h = {'time': hist[0], 'price': hist[1]}
                 c1.append(h)
             c1 = sorted(c1, key=lambda x: x["time"])
-            global_value.set_cache(active, c0, 'data')
-            global_value.set_cache(active, c1, 'live')
             if not active in global_value.pairs:
                 global_value.pairs[active] = {}
             if active in global_value.pairs:
