@@ -329,6 +329,18 @@ class PocketOption:
 
         return dt
 
+    def get_dataframe_json(self, active, period):
+        df = self.get_dataframe(active, period)
+
+        if df is not None:
+            values = []
+            for x in range(0, len(df)):
+                val = {'open': df.loc[x]['open'], 'high': df.loc[x]['high'], 'low': df.loc[x]['low'], 'close': df.loc[x]['close']}
+                value = {df.loc[x]['time'].timestamp(): val}
+                values.append(value)
+            return values
+        return None
+
     def get_dataframe(self, active, period):
         if active in global_value.pairs:
             if 'dataframe' in global_value.pairs[active]:
