@@ -359,7 +359,7 @@ class PocketOption:
                 df = df1['price'].resample(f'{period}s').ohlc()
                 df.dropna(inplace=True)
                 df.reset_index(inplace=True)
-                df = df.loc[df['time'] < datetime.fromtimestamp(self.wait(False, period))]
+                #df = df.loc[df['time'] < datetime.fromtimestamp(self.wait(False, period))]
 
                 if df0 is not None:
                     ts = datetime.timestamp(df.loc[0]['time'])

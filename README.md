@@ -149,7 +149,7 @@ This project is an unofficial implementation and has no connection with PocketOp
 ## 📞 Support
 
 - 📧 Email: [sebastianspaaa@gmail.com](mailto:sebastianspaaa@gmail.com)
-- 💬 Telegram: [@devAdminhu](https://t.me/mastaaa667)
+- 💬 Telegram: [@mastaaa667](https://t.me/mastaaa667)
 - 🌐 Website: [mastaaa1987.site](https://mastaaa1987.github.io)
 
 ---
