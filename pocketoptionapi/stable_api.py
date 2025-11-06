@@ -278,57 +278,6 @@ class PocketOption:
     def get_symbol(self, active, period):
         return self.get_candles(active, period)
 
-    def wait(self, sleep=True, period=60):
-        dt = int(datetime.now().timestamp()) - int(datetime.now().second)
-        if period == 60:
-            dt += 60
-        elif period == 30:
-            if datetime.now().second < 30: dt += 30
-            else: dt += 60
-            if not sleep: dt -= 30
-        elif period == 15:
-            if datetime.now().second >= 45: dt += 60
-            elif datetime.now().second >= 30: dt += 45
-            elif datetime.now().second >= 15: dt += 30
-            else: dt += 15
-            if not sleep: dt -= 15
-        elif period == 10:
-            if datetime.now().second >= 50: dt += 60
-            elif datetime.now().second >= 40: dt += 50
-            elif datetime.now().second >= 30: dt += 40
-            elif datetime.now().second >= 20: dt += 30
-            elif datetime.now().second >= 10: dt += 20
-            else: dt += 10
-            if not sleep: dt -= 10
-        elif period == 5:
-            if datetime.now().second >= 55: dt += 60
-            elif datetime.now().second >= 50: dt += 55
-            elif datetime.now().second >= 45: dt += 50
-            elif datetime.now().second >= 40: dt += 45
-            elif datetime.now().second >= 35: dt += 40
-            elif datetime.now().second >= 30: dt += 35
-            elif datetime.now().second >= 25: dt += 30
-            elif datetime.now().second >= 20: dt += 25
-            elif datetime.now().second >= 15: dt += 20
-            elif datetime.now().second >= 10: dt += 15
-            elif datetime.now().second >= 5: dt += 10
-            else: dt += 5
-            if not sleep: dt -= 5
-        elif period == 120:
-            dt = int(datetime(int(datetime.now().year), int(datetime.now().month), int(datetime.now().day), int(datetime.now().hour), int(math.floor(int(datetime.now().minute) / 2) * 2), 0).timestamp())
-            dt += 120
-        elif period == 180:
-            dt = int(datetime(int(datetime.now().year), int(datetime.now().month), int(datetime.now().day), int(datetime.now().hour), int(math.floor(int(datetime.now().minute) / 3) * 3), 0).timestamp())
-            dt += 180
-        elif period == 300:
-            dt = int(datetime(int(datetime.now().year), int(datetime.now().month), int(datetime.now().day), int(datetime.now().hour), int(math.floor(int(datetime.now().minute) / 5) * 5), 0).timestamp())
-            dt += 300
-        elif period == 600:
-            dt = int(datetime(int(datetime.now().year), int(datetime.now().month), int(datetime.now().day), int(datetime.now().hour), int(math.floor(int(datetime.now().minute) / 10) * 10), 0).timestamp())
-            dt += 600
-
-        return dt
-
     def get_dataframe_json(self, active, period):
         df = self.get_dataframe(active, period)
 
@@ -336,7 +285,7 @@ class PocketOption:
             values = []
             for x in range(0, len(df)):
                 val = {'open': df.loc[x]['open'], 'high': df.loc[x]['high'], 'low': df.loc[x]['low'], 'close': df.loc[x]['close']}
-                value = {df.loc[x]['time'].timestamp(): val}
+                value = {int(df.loc[x]['time'].timestamp()): val}
                 values.append(value)
             return values
         return None
@@ -354,12 +303,11 @@ class PocketOption:
                 df1 = df1.sort_values(by='time').reset_index(drop=True)
                 df1['time'] = pd.to_datetime(df1['time'], unit='s')
                 df1.set_index('time', inplace=True)
-                # df1.index = df1.index.floor('1s')
+                df1.index = df1.index.floor('1s')
 
-                df = df1['price'].resample(f'{period}s').ohlc()
+                df = df1['price'].resample(f'{period}s', origin='end_day').ohlc()
                 df.dropna(inplace=True)
                 df.reset_index(inplace=True)
-                #df = df.loc[df['time'] < datetime.fromtimestamp(self.wait(False, period))]
 
                 if df0 is not None:
                     ts = datetime.timestamp(df.loc[0]['time'])
@@ -446,7 +394,7 @@ class PocketOption:
             global_value.logger("except get_candles", "DEBUG")
             return False
 
-    def get_candles(self, active, period, start_time=None, count=6000, count_request=3):
+    def get_candles(self, active, period, start_time=None, count=6000, count_request=10):
         try:
             if start_time is None:
                 time_sync = self.get_server_timestamp()
@@ -480,7 +428,7 @@ class PocketOption:
                     global_value.logger(str(e), "ERROR")
             c0, c1 = [], []
             if period < 60 or count_request > 1:
-                time_red = int(datetime.now().timestamp())
+                #time_red = int(datetime.now().timestamp())
                 x = 0
                 while True:
                     x += 1
@@ -510,10 +458,16 @@ class PocketOption:
                 for can in his['candles']:
                     c = {'time': can[0], 'open': can[1], 'high': can[3], 'low': can[4], 'close': can[2]}
                     c0.append(c)
+            if len(c1) > 0:
+                for cc in c1:
+                    c = {'time': cc['time'], 'open': cc['open'], 'high': cc['high'], 'low': cc['low'], 'close': cc['close']}
+                    c0.append(c)
+                    #c = {'time': }
             c0 = sorted(c0, key=lambda x: x["time"])
             for hist in his['history']:
                 h = {'time': hist[0], 'price': hist[1]}
                 c1.append(h)
+
             c1 = sorted(c1, key=lambda x: x["time"])
             if not active in global_value.pairs:
                 global_value.pairs[active] = {}
