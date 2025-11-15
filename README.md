@@ -103,7 +103,10 @@ df = api.get_history(
 websocket-client>=1.6.1
 requests>=2.31.0
 python-dateutil>=2.8.2
-pandas>=2.1.3
+tzlocal>=5.1
+websockets>=15.0
+pandas>=2.0.3
+colorama>=0.4.6
 ```
 
 ### Getting the SSID
