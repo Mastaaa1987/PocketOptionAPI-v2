@@ -201,32 +201,39 @@ class PocketOption:
         return global_value.result, global_value.order_data.get("id", None)
 
     def check_win(self, id_number=None):
+        open_order = None
         if not id_number:
-            order_info = self.get_async_order()
-            return order_info
+            if global_value.order_data is not None:
+                open_order = global_value.order_data
+            # order_info = self.get_async_order()
+            # return order_info
+        else:
+            if global_value.order_data is not None and "id" in global_value.order_data and global_value.order_data["id"] == id_number:
+                open_order = global_value.order_data
+            else:
+                for order in global_value.open_orders:
+                    if order["id"] == id_number:
+                       open_order = order
+                       break
+        if not open_order:
+            global_value.logger("Unable to retrieve open order information.", "ERROR")
+            return None, "unknown"
         start_t = time.time()
         order_info = None
 
-        while True:
-            try:
-                order_info = self.get_async_order(id_number)
-                if order_info and "id" in order_info and order_info["id"] is not None:
+        for i in range(1, 100):
+            for deal in global_value.closed_orders:
+                if deal['deals'][0]['id'] == id_number:
+                    order_info = deal
                     break
-            except:
-                pass
-
-            if time.time() - start_t >= 180:
-                # logger.error("Timeout: Unable to retrieve order information in time.")
-                global_value.logger("Timeout: Unable to retrieve order information in time.", "ERROR")
-                return None, "unknown"
-
+            if order_info is not None:
+                break
             time.sleep(0.1)
 
-        if order_info and "profit" in order_info:
-            status = "win" if order_info["profit"] > 0 else "loose"
+        if order_info is not None:
+            status = "loose" if order_info["profit"] == 0 else "draw" if order_info["profit"] == open_order['amount'] else "win"
             return order_info["profit"], status
         else:
-            # logger.error("Invalid order information retrieved.")
             global_value.logger("Invalid order information retrieved.", "ERROR")
             return None, "unknown"
 
