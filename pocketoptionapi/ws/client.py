@@ -87,14 +87,37 @@ class WebsocketClient(object):
             for url in self.region.get_regions(global_value.DEMO):
                 global_value.logger(str(url), "INFO")
                 try:
+                    # ==========================================================
+                    # --- START OF 'additional_headers' FIX ---
+                    # ==========================================================
+                    connect_kwargs = {
+                        "ssl": ssl_context,
+                    }
+
+                    # Check if websockets version supports additional_headers
+                    if hasattr(websockets.client.connect, "__defaults__") and "additional_headers" in websockets.client.connect.__annotations__:
+                        connect_kwargs["additional_headers"] = {
+                            "Origin": "https://pocketoption.com",
+                            "Cache-Control": "no-cache",
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                        }
+                    else:
+                        # Puraton version, 'additional_headers' pathano jabe na
+                        global_value.logger("Old websockets library detected. Skipping 'additional_headers'.", "INFO")
+                    
+                    # async with websockets.connect(url, **connect_kwargs) as ws:
+                    # Original code below (commented out)
+                    # ==========================================================
+                    
                     async with websockets.connect(
                             url,
-                            ssl=ssl_context,
-                            additional_headers={
-                                "Origin": "https://pocketoption.com",
-                                "Cache-Control": "no-cache",
-                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-                            }
+                            **connect_kwargs
+                            # ssl=ssl_context,
+                            # additional_headers={
+                            #     "Origin": "https://pocketoption.com",
+                            #     "Cache-Control": "no-cache",
+                            #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                            # }
                     ) as ws:
                         self.websocket = ws
                         self.url = url
@@ -170,6 +193,8 @@ class WebsocketClient(object):
 
             elif "requestId" in message and message["requestId"] == 'buy':
                 global_value.order_data = message
+                if 'open_orders' not in dir(global_value):
+                     global_value.open_orders = []
                 global_value.open_orders.insert(0, message)
 
             elif self.updateClosedDeals and isinstance(message, list):
@@ -178,6 +203,8 @@ class WebsocketClient(object):
 
             elif self.successcloseOrder and isinstance(message, dict):
                 self.api.order_async = message
+                if 'closed_orders' not in dir(global_value):
+                     global_value.closed_orders = []
                 global_value.closed_orders.insert(0, message)
                 self.successcloseOrder = False
 
