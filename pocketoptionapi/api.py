@@ -34,6 +34,7 @@ class PocketOptionAPI(object):
     buy_order_id = None
     order_async = None
     strike_list = None
+    pairs = {}
 
     def __init__(self, proxies=None):
         self.websocket_client = None

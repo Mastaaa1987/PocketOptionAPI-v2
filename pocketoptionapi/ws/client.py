@@ -95,15 +95,15 @@ class WebsocketClient(object):
                     }
 
                     # Check if websockets version supports additional_headers
-                    if hasattr(websockets.client.connect, "__defaults__") and "additional_headers" in websockets.client.connect.__annotations__:
-                        connect_kwargs["additional_headers"] = {
-                            "Origin": "https://pocketoption.com",
-                            "Cache-Control": "no-cache",
-                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-                        }
-                    else:
+                    #if hasattr(websockets.client.connect, "__defaults__") and "additional_headers" in websockets.client.connect.__annotations__:
+                        #connect_kwargs["additional_headers"] = {
+                            #"Origin": "https://pocketoption.com",
+                            #"Cache-Control": "no-cache",
+                            #"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                        #}
+                    #else:
                         # Puraton version, 'additional_headers' pathano jabe na
-                        global_value.logger("Old websockets library detected. Skipping 'additional_headers'.", "INFO")
+                        #global_value.logger("Old websockets library detected. Skipping 'additional_headers'.", "INFO")
                     
                     # async with websockets.connect(url, **connect_kwargs) as ws:
                     # Original code below (commented out)
@@ -111,13 +111,13 @@ class WebsocketClient(object):
                     
                     async with websockets.connect(
                             url,
-                            **connect_kwargs
-                            # ssl=ssl_context,
-                            # additional_headers={
-                            #     "Origin": "https://pocketoption.com",
-                            #     "Cache-Control": "no-cache",
-                            #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-                            # }
+                            #**connect_kwargs
+                            ssl=ssl_context,
+                            additional_headers={
+                                "Origin": "https://pocketoption.com",
+                                "Cache-Control": "no-cache",
+                                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                            }
                     ) as ws:
                         self.websocket = ws
                         self.url = url
@@ -216,6 +216,10 @@ class WebsocketClient(object):
                 self.updateStream = False
                 if len(message[0]) == 3:
                     self.api.time_sync.server_timestamp = message[0][1]
+                    if not message[0][0] in self.api.pairs:
+                        self.api.pairs[message[0][0]] = {'ticks': [], 'history': []}
+                    h = {'time': message[0][1], 'price': message[0][2]}
+                    self.api.pairs[message[0][0]]['ticks'].append(h)
                     if message[0][0] in global_value.pairs:
                         if 'history' in global_value.pairs[message[0][0]]:
                             h = {'time': message[0][1], 'price': message[0][2]}

@@ -59,23 +59,38 @@ print(saldo)
 
 time.sleep(1)
 
-pairs = api.get_pairs()
+pairs = api.GetPairs()
 
-#print(pairs)
-for pair in pairs:
-    print(pair, pairs[pair])
+print(pairs)
 
 time.sleep(1)
 
-result = api.get_symbol(symbol, period)
+symbol = api.ChangeSymbol('AEDCNY_otc', 60)
 
-print(result) # True or False
+print(symbol)
 
 time.sleep(1)
 
-df = api.get_dataframe(symbol, period)
+buy, bid = api.Buy(5, 'AEDCNY_otc', 'put', 15)
 
-print(df)
+print(buy, bid)
+
+time.sleep(1)
+
+profit, status = api.CheckWin(bid)
+
+print(profit, status)
+
+time.sleep(1)
+
+history = api.GetHistory('AEDCNY_otc')
+
+print(len(history))
+
+for i in range(0, 10):
+    time.sleep(1)
+    ticks = api.GetTicks('AEDCNY_otc')
+    print(len(ticks))
 
 
 ```

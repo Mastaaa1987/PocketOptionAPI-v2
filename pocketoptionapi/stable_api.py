@@ -123,6 +123,38 @@ class PocketOption:
         except:
             return None
 
+    def GetPairs(self):
+        try:
+            data = json.loads(self.api.GetPayoutData())
+            dat = {}
+            for pair in data:
+                if len(pair) == 19:
+                    p = {}
+                    p['id'] = pair[0]
+                    p['payout'] = pair[5]
+                    p['type'] = pair[3]
+                    p['active'] = pair[14]
+                    dat[pair[1]] = p
+            return dat
+        except:
+            return None
+
+    def GetHistory(self, pair):
+        try:
+            if pair in self.api.pairs:
+                return self.api.pairs[pair]['history']
+            return None
+        except:
+            return None
+
+    def GetTicks(self, pair):
+        try:
+            if pair in self.api.pairs:
+                return self.api.pairs[pair]['ticks']
+            return None
+        except:
+            return None
+
     def GetPayout(self, pair):
         try:
             data = self.api.GetPayoutData()
@@ -167,6 +199,12 @@ class PocketOption:
 
         return pack[0]
 
+    def Buy(self, amount, active, action, expirations):
+        return self.buy(amount, active, action, expirations)
+
+    def CheckWin(self, id_number=None):
+        return self.check_win(id_number)
+
     def buy(self, amount, active, action, expirations):
         self.api.buy_multi_option = {}
         self.api.buy_successful = None
@@ -190,7 +228,7 @@ class PocketOption:
         while True:
             if global_value.result is not None and global_value.order_data is not None:
                 break
-            if time.time() - start_t >= 5:
+            if time.time() - start_t >= 60:
                 if isinstance(global_value.order_data, dict) and "error" in global_value.order_data:
                     global_value.logger(str(global_value.order_data["error"]), "ERROR")
                 else:
@@ -221,12 +259,12 @@ class PocketOption:
         start_t = time.time()
         order_info = None
 
-        for i in range(1, 100):
+        while True:
             for deal in global_value.closed_orders:
                 if deal['deals'][0]['id'] == id_number:
                     order_info = deal
                     break
-            if order_info is not None:
+            if order_info is not None or time.time() - start_t >= 60:
                 break
             time.sleep(0.1)
 
@@ -399,6 +437,51 @@ class PocketOption:
 
         except:
             global_value.logger("except get_candles", "DEBUG")
+            return False
+
+    def ChangeSymbol(self, active, period):
+        try:
+            his = None
+
+            while True:
+                try:
+                    self.api.change_symbol(active, period)
+
+                    for i in range(1, 100):
+                        if self.api.history_new is None:
+                            time.sleep(0.1)
+                        elif self.api.history_new is not None or i == 99:
+                            break
+
+                    if self.api.history_new is not None:
+                        his = self.api.history_new
+                        break
+
+                except Exception as e:
+                    # logging.error(e)
+                    global_value.logger(str(e), "ERROR")
+
+            if his:
+                c0, c1 = [], []
+
+                if 'candles' in his and len(his['candles']) > 0:
+                    for can in his['candles']:
+                        c = {'time': can[0], 'open': can[1], 'high': can[3], 'low': can[4], 'close': can[2]}
+                        c0.append(c)
+                    c0 = sorted(c0, key=lambda x: x["time"])
+                if 'history' in his and len(his['history']) > 0:
+                    for hist in his['history']:
+                        h = {'time': hist[0], 'price': hist[1]}
+                        c1.append(h)
+                    c1 = sorted(c1, key=lambda x: x["time"])
+
+                self.api.pairs[active] = {'ticks': c1, 'history': c0}
+
+                return True
+            else:
+                return False
+        except:
+            global_value.logger("except ChangeSymbol", "INFO")
             return False
 
     def get_candles(self, active, period, start_time=None, count=6000, count_request=10):
