@@ -53,7 +53,7 @@ api.connect()
 time.sleep(3)
 
 # Check balance
-saldo = api.get_balance()
+saldo = api.GetBalance()
 
 print(saldo)
 
