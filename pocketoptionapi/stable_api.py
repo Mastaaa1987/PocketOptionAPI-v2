@@ -155,6 +155,12 @@ class PocketOption:
         except:
             return None
 
+    def GetBalance(self):
+        if global_value.balance_updated:
+            return global_value.balance
+        else:
+            return None
+
     def GetPayout(self, pair):
         try:
             data = self.api.GetPayoutData()
