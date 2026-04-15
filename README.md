@@ -76,7 +76,7 @@ time.sleep(1)
 # Trade
 status, id = api.Buy(5, 'AEDCNY_otc', 'put', 15) # api.Buy(amount, pair, action, expirations)
 
-print(status, ID)
+print(status, id)
 
 time.sleep(1)
 
