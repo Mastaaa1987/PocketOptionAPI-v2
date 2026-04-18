@@ -141,16 +141,16 @@ class PocketOption:
 
     def GetHistory(self, pair):
         try:
-            if pair in self.api.pairs:
-                return self.api.pairs[pair]['history']
+            if pair in global_value.pairs:
+                return global_value.pairs[pair]['history']
             return None
         except:
             return None
 
     def GetTicks(self, pair):
         try:
-            if pair in self.api.pairs:
-                return self.api.pairs[pair]['ticks']
+            if pair in global_value.pairs:
+                return global_value.pairs[pair]['ticks']
             return None
         except:
             return None
@@ -481,7 +481,7 @@ class PocketOption:
                         c1.append(h)
                     c1 = sorted(c1, key=lambda x: x["time"])
 
-                self.api.pairs[active] = {'ticks': c1, 'history': c0}
+                global_value.pairs[active] = {'ticks': c1, 'history': c0}
 
                 return True
             else:

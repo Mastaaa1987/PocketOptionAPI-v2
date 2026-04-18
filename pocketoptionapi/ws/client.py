@@ -216,14 +216,10 @@ class WebsocketClient(object):
                 self.updateStream = False
                 if len(message[0]) == 3:
                     self.api.time_sync.server_timestamp = message[0][1]
-                    if not message[0][0] in self.api.pairs:
-                        self.api.pairs[message[0][0]] = {'ticks': [], 'history': []}
+                    if not message[0][0] in global_value.pairs:
+                        global_value.pairs[message[0][0]] = {'ticks': [], 'history': []}
                     h = {'time': message[0][1], 'price': message[0][2]}
-                    self.api.pairs[message[0][0]]['ticks'].append(h)
-                    if message[0][0] in global_value.pairs:
-                        if 'history' in global_value.pairs[message[0][0]]:
-                            h = {'time': message[0][1], 'price': message[0][2]}
-                            global_value.pairs[message[0][0]]['history'].append(h)
+                    global_value.pairs[message[0][0]]['ticks'].append(h)
 
             elif self.updateHistoryNew and isinstance(message, dict):
                 self.updateHistoryNew = False

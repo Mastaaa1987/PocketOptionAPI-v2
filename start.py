@@ -1,5 +1,6 @@
 import time
 from pocketoptionapi.stable_api import PocketOption
+import pocketoptionapi.global_value as global_value
 
 ssid = """42["auth",{"session":"abcdefghijklm12nopqrstuvwx","isDemo":1,"uid":12345678,"platform":2}]"""
 demo = True
@@ -49,10 +50,19 @@ time.sleep(1)
 # Get History Data
 history = api.GetHistory('AEDCNY_otc') # api.GetHistory(pair)
 
-print(len(history))
+print("len api.GetHistory: ", len(history))
 
 # Get Live Ticks
 for i in range(0, 10):
     time.sleep(1)
     ticks = api.GetTicks('AEDCNY_otc') # api.GetTicks(pair)
-    print(len(ticks))
+    print("len api.GetTicks: ", len(ticks))
+
+time.sleep(1)
+
+print("len global_value.pairs ticks: ", len(global_value.pairs['AEDCNY_otc']['ticks']))
+
+time.sleep(1)
+
+print("len global_value.pairs history: ", len(global_value.pairs['AEDCNY_otc']['history']))
+
