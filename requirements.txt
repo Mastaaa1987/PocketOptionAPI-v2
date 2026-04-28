@@ -5,3 +5,4 @@ tzlocal>=5.1
 websockets>=12.0
 pandas>=2.0.3
 colorama>=0.4.6
+pywebview>=6.2.1

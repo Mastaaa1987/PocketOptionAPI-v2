@@ -239,7 +239,7 @@ class WebsocketClient(object):
             await self.websocket.send("3")
 
         elif "40" and "sid" in message:
-            await self.websocket.send(self.ssid)
+            await self.websocket.send(global_value.SSID)
 
         elif message.startswith('451-['):
             json_part = message.split("-", 1)[1]

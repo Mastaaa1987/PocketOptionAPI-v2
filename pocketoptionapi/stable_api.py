@@ -1,4 +1,4 @@
-import asyncio, threading, sys, json, time, operator, math
+import asyncio, threading, sys, json, time, operator, math, os, time, requests, webview, urllib.parse
 from datetime import datetime
 from tzlocal import get_localzone
 from pocketoptionapi.api import PocketOptionAPI
@@ -15,10 +15,45 @@ local_zone_name = get_localzone()
 def get_balance():
     return global_value.balance
 
+def read_cookies(window):
+    i = 0
+    while True:
+        i += 1
+        cookies = {}
+        cooks = window.get_cookies()
+        for c in cooks:
+            cookie = c.output().split(";")[0].split("-Cookie: ")[1].split("=")
+            cookies[cookie[0]] = cookie[1]
+        if 'ci_session' in cookies and 'afUserId' in cookies and 'ttcsid' in cookies and '_scid' in cookies and '_scid_r' in cookies and '_twpid' in cookies and 'lo_uid' in cookies:
+            real_ssid = urllib.parse.unquote(cookies['ci_session'])
+
+            r = requests.get('https://pocketoption.com/en/cabinet/demo-quick-high-low', cookies=cookies)
+            if r.status_code == 200:
+                sess = r.text.split("demoSessionId\":\"")[1].split("\"")[0]
+                uid = r.text.split("uid\":")[1].split(",")[0]
+                if sess and uid:
+                    if global_value.DEMO == True:
+                        global_value.SSID = '42["auth",{"session":"%s","isDemo":1,"uid":%s,"platform":2,"isFastHistory":true,"isOptimized":true}]' % (sess, uid)
+                    elif global_value.DEMO == False:
+                        global_value.SSID = '42["auth",{"session":"%s","isDemo":0,"uid":%s,"platform":2,"isFastHistory":true,"isOptimized":true}]' % (real_ssid.replace('"', '\\"'), uid)
+                    window.destroy()
+                    return True
+
+            # sys.exit()
+        elif i >= 250:
+            return False
+        else:
+            time.sleep(1)
+
+
+class Api:
+    def clearCookies(self):
+        window.clear_cookies()
+
 class PocketOption:
     __version__ = "1.0.0"
 
-    def __init__(self, ssid, demo):
+    def __init__(self, demo: bool = True, ssid: str | None = None):
         self.size = [1, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800,
                      3600, 7200, 14400, 28800, 43200, 86400, 604800, 2592000]
         global_value.SSID = ssid
@@ -98,6 +133,10 @@ class PocketOption:
 
     def connect(self):
         try:
+            if global_value.SSID == None:
+                window = webview.create_window('Cookie example', 'https://pocketoption.com/en/cabinet/demo-quick-high-low', js_api=Api())
+                webview.start(read_cookies, window, private_mode=False, http_server=True, http_port=13377)
+
             websocket_thread = threading.Thread(target=self.api.connect, daemon=True)
             websocket_thread.start()
 

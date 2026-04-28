@@ -10,7 +10,7 @@
 
 ## ✨ Highlights
 
-- 🔐 **Secure Authentication**: Login via SSID and robust session management
+- 🔐 **Secure Authentication**: Login via SSID or Browser and robust session management
 - 💹 **Automated Trading**: Programmatic buying and selling operations
 - 📊 **Real Time Data**: WebSocket for quotes and operations
 - 📈 **Technical Analysis**: Access to historical data and indicators
@@ -37,15 +37,17 @@ pip install git+https://github.com/Mastaaa1987/PocketOptionAPI-v2.git
 from pocketoptionapi.stable_api import PocketOption
 import time
 
-# Session configuration
-ssid = """42["auth",{"session":"asdasdasddsad","isDemo":1,"uid":12345465,"platform":2}]"""
-demo = True  # True for demo account, False for real account
+#### You not need to set the SSID Manual, because the API will get the SSID automatic after you Login into Pocketoption via pywebview!
+#### If you want to work with Real Account you only to set demo to False (default demo is set to True ...)
+## Session configuration
+# ssid = """42["auth",{"session":"asdasdasddsad","isDemo":1,"uid":12345465,"platform":2}]"""
+demo = False  # True for demo account, False for real account
 
 symbol = "CADCHF_otc"
 period = 30
 
 # Initialize API
-api = PocketOption(ssid, demo)
+api = PocketOption(demo)
 
 # Connect
 api.connect()
@@ -137,10 +139,12 @@ tzlocal>=5.1
 websockets>=15.0
 pandas>=2.0.3
 colorama>=0.4.6
+pywebview>=6.2.1
 ```
 
 ### Getting the SSID
 To get the SSID required for authentication:
+(You not need to get the SSID anymore! You can easy login on PocketOption Page via pywebview ...)
 
 1. Log in to the PocketOption platform via browser
 2. Open Developer Tools (F12)

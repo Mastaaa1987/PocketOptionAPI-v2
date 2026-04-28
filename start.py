@@ -2,10 +2,10 @@ import time
 from pocketoptionapi.stable_api import PocketOption
 import pocketoptionapi.global_value as global_value
 
-ssid = """42["auth",{"session":"abcdefghijklm12nopqrstuvwx","isDemo":1,"uid":12345678,"platform":2}]"""
+#ssid = """42["auth",{"session":"abcdefghijklm12nopqrstuvwx","isDemo":1,"uid":12345678,"platform":2}]"""
 demo = True
 
-api = PocketOption(ssid,demo)
+api = PocketOption(demo)
 
 # Connect to API
 api.connect()
