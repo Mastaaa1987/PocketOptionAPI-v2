@@ -144,6 +144,7 @@ pywebview>=6.2.1
 
 ### Getting the SSID
 To get the SSID required for authentication:
+
 (You not need to get the SSID anymore! You can easy login on PocketOption Page via pywebview ...)
 
 1. Log in to the PocketOption platform via browser
