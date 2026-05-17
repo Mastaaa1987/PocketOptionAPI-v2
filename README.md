@@ -43,8 +43,8 @@ import time
 # ssid = """42["auth",{"session":"asdasdasddsad","isDemo":1,"uid":12345465,"platform":2}]"""
 demo = False  # True for demo account, False for real account
 
-symbol = "CADCHF_otc"
-period = 30
+symbol = "AEDCNY_otc"
+period = 60
 
 # Initialize API
 api = PocketOption(demo)
@@ -69,14 +69,14 @@ print(pairs)
 time.sleep(1)
 
 # Change Symbol
-status = api.ChangeSymbol('AEDCNY_otc', 60) # api.ChangeSymbol(pair, expirations)
+status = api.ChangeSymbol(symbol, period) # api.ChangeSymbol(pair, expirations)
 
 print(status)
 
 time.sleep(1)
 
 # Trade
-status, id = api.Buy(5, 'AEDCNY_otc', 'put', 15) # api.Buy(amount, pair, action, expirations)
+status, id = api.Buy(5, symbol, 'put', period) # api.Buy(amount, pair, action, expirations)
 
 print(status, id)
 
@@ -90,23 +90,23 @@ print(profit, status)
 time.sleep(1)
 
 # Get History Data
-history = api.GetHistory('AEDCNY_otc') # api.GetHistory(pair)
+history = api.GetHistory(symbol) # api.GetHistory(pair)
 
 print("len api.GetHistory: ", len(history))
 
 # Get Live Ticks
 for i in range(0, 10):
     time.sleep(1)
-    ticks = api.GetTicks('AEDCNY_otc') # api.GetTicks(pair)
+    ticks = api.GetTicks(symbol) # api.GetTicks(pair)
     print("len api.GetTicks: ", len(ticks))
 
 time.sleep(1)
 
-print("len global_value.pairs ticks: ", len(global_value.pairs['AEDCNY_otc']['ticks']))
+print("len global_value.pairs ticks: ", len(global_value.pairs[symbol]['ticks']))
 
 time.sleep(1)
 
-print("len global_value.pairs history: ", len(global_value.pairs['AEDCNY_otc']['history']))
+print("len global_value.pairs history: ", len(global_value.pairs[symbol]['history']))
 
 
 
