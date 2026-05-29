@@ -142,19 +142,20 @@ colorama>=0.4.6
 pywebview>=6.2.1
 ```
 
-### Getting the SSID
-To get the SSID required for authentication:
+### <del>Getting the SSID</del>
 
-(You not need to get the SSID anymore! You can easy login on PocketOption Page via pywebview ...)
+You not need to get the SSID anymore! You can easy login on PocketOption Page via pywebview ...
 
-1. Log in to the PocketOption platform via browser
-2. Open Developer Tools (F12)
-3. Go to the "Network" tab
-4. Look for WebSocket connections
-5. Find the authentication message that contains the SSID
-6. Copy the full SSID in the format shown in the example
+<del>To get the SSID required for authentication:</del>
 
-How To get SSID.docx [HERE](https://github.com/Mastaaa1987/PocketOptionAPI/raw/refs/heads/master/How%20to%20get%20SSID.docx)
+<del>1. Log in to the PocketOption platform via browser</del>
+<del>2. Open Developer Tools (F12)</del>
+<del>3. Go to the "Network" tab</del>
+<del>4. Look for WebSocket connections</del>
+<del>5. Find the authentication message that contains the SSID</del>
+<del>6. Copy the full SSID in the format shown in the example</del>
+
+<del>How To get SSID.docx [HERE](https://github.com/Mastaaa1987/PocketOptionAPI/raw/refs/heads/master/How%20to%20get%20SSID.docx)</del>
 
 ## 🤝 Contributing
 
